@@ -1,0 +1,20 @@
+include(ExternalProject)
+ExternalProject_Add(project_portaudio
+    GIT_REPOSITORY      https://github.com/PortAudio/portaudio.git
+    GIT_TAG             3f7bee79a65327d2e0965e8a74299723ed6f072d
+)
+ExternalProject_Get_Property(project_portaudio BINARY_DIR)
+ExternalProject_Get_Property(project_portaudio SOURCE_DIR)
+set(portaudio_lib_dir "${BINARY_DIR}")
+set(portaudio_inc_dir "${SOURCE_DIR}/include")
+add_library(portaudio STATIC IMPORTED)
+set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION "${portaudio_lib_dir}/libportaudio.a")
+if(APPLE)
+   find_library(CORE_AUDIO_LIBRARY CoreAudio)
+   set(EXTRA_LIBS ${CORE_AUDIO_LIBRARY})
+endif (APPLE)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+   set(EXTRA_LIBS rt asound jack pthread)
+endif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+include_directories(include ${portaudio_inc_dir})
+target_link_libraries(${PROJECT_NAME} ${EXTRA_LIBS} portaudio)

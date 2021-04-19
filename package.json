@@ -1,0 +1,16 @@
+{
+    "name": "rtaudio",
+    "main": "index.js",
+    "version": "0.0.1",
+    "scripts": {
+        "install": "cmake-js compile",
+        "test": "node test.js"
+    },
+    "dependencies": {
+        "bindings": "^1.5.0"
+    },
+    "devDependencies": {
+        "cmake-js": "^6.1.0",
+        "node-addon-api": "^3.1.0"
+    }
+}
