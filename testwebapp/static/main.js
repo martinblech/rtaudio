@@ -252,7 +252,7 @@
       new HistoryRenderer(
         addVizCanvas("rms", 600, 100),
         (frame) => {
-          return frame.rmsMid;
+          return frame.normalizedRmsMid;
         },
         300
       )

@@ -13,6 +13,7 @@ struct AudioFrame {
   std::vector<float> fft;
   std::vector<float> absolute_fft;
   float rms = 0;
+  float rms_slow_max = 0;
   float rms_slow = 0;
   float rms_mid = 0;
   float rms_fast = 0;
@@ -30,6 +31,7 @@ struct AudioFrame {
 
     std::vector<float> samples;
     float rms = 0;
+    float rms_slow_max = 0;
     float rms_slow = 0;
     float rms_mid = 0;
     float rms_fast = 0;
