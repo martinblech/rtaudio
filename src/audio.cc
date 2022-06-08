@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <cmath>
+#include <optional>
 
 #include "Iir.h"
 #include "fft.h"
@@ -19,18 +20,22 @@ class ExpDecayFollower {
       : alpha_(TauToAlpha(sample_rate, tau_seconds)), mode_(mode) {}
 
   float update(float value) {
-    if (value > value_ && mode_ == Mode::kMax) {
+    if (!value_) {
+      value_ = value;
+      return value;
+    }
+    if (value > *value_ && mode_ == Mode::kMax) {
       value_ = value;
     } else {
-      value_ += alpha_ * (value - value_);
+      *value_ += alpha_ * (value - *value_);
     }
-    return value_;
+    return *value_;
   }
 
-  float value() const { return value_; }
+  float value() const { return *value_; }
 
  private:
-  float value_;
+  std::optional<float> value_;
   const float alpha_;
   const Mode mode_;
 };
