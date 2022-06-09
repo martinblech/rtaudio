@@ -1,6 +1,8 @@
 #include "stream.h"
 
+#include <chrono>
 #include <iostream>
+#include <sstream>
 #include <utility>
 
 #include "pacheck.h"
@@ -28,8 +30,6 @@ InputStream::InputStream(const Napi::CallbackInfo& info) : ObjectWrap(info) {
     NAPI_THROW(Napi::TypeError::New(env, "options argument is not an object"));
   }
 
-  PA_CHECK(Pa_Initialize());
-
   const Napi::Object options = info[0].As<Napi::Object>();
   if (const Napi::Value value = options["device"]; !value.IsUndefined()) {
     if (!value.IsNumber()) {
@@ -38,8 +38,6 @@ InputStream::InputStream(const Napi::CallbackInfo& info) : ObjectWrap(info) {
                                     value.ToString().Utf8Value()));
     }
     device_ = value.ToNumber().Int32Value();
-  } else {
-    device_ = Pa_GetDefaultInputDevice();
   }
   if (const Napi::Value value = options["sampleRate"]; !value.IsUndefined()) {
     if (!value.IsNumber()) {
@@ -89,16 +87,20 @@ InputStream::InputStream(const Napi::CallbackInfo& info) : ObjectWrap(info) {
 }
 
 InputStream::~InputStream() {
-  PaError error;
-  if (running_.load()) {
+  if (running_) {
     std::cerr << "~InputStream() destructor called while still running."
               << std::endl;
     tsfn_.Abort();
-    running_.store(false);
-    reader_thread_.join();
-    std::cerr << "Reader thread terminated." << std::endl;
+    Terminate();
   }
+  running_ = false;
+  if (reader_thread_.joinable()) {
+    reader_thread_.join();
+  }
+}
 
+void InputStream::Terminate() {
+  PaError error;
   error = Pa_Terminate();
   if (error != paNoError) {
     std::cerr << "Pa_Terminate() failed: " << Pa_GetErrorText(error)
@@ -113,17 +115,32 @@ void InputStream::Start(const Napi::CallbackInfo& info) {
     NAPI_THROW(Napi::Error::New(env, "Stream already initialized"));
   }
 
-  const PaDeviceInfo* const inputInfo = Pa_GetDeviceInfo(device_);
+  PA_CHECK(Pa_Initialize());
+
+  struct Cleanup {
+    bool success = false;
+    ~Cleanup() {
+      if (!success) {
+        Terminate();
+      }
+    }
+  } cleanup;
+
+  if (!device_) {
+    device_ = Pa_GetDefaultInputDevice();
+  }
+
+  const PaDeviceInfo* const inputInfo = Pa_GetDeviceInfo(*device_);
   if (!inputInfo) {
     NAPI_THROW(Napi::Error::New(
-        env, std::string("Invalid device index: ") + std::to_string(device_)));
+        env, std::string("Invalid device index: ") + std::to_string(*device_)));
   }
   if (inputInfo->maxInputChannels == 0) {
     NAPI_THROW(Napi::Error::New(
         env, std::string("Not an input device: ") + inputInfo->name));
   }
   const PaStreamParameters inputParameters{
-      .device = device_,
+      .device = *device_,
       .channelCount = 1,
       .sampleFormat = paFloat32,
       .suggestedLatency = inputInfo->defaultLowInputLatency,
@@ -145,7 +162,28 @@ void InputStream::Start(const Napi::CallbackInfo& info) {
 
   running_.store(true);
   reader_thread_ = std::thread([this, js_this = Napi::Persistent(info.This())] {
+    auto last_available = std::chrono::system_clock::now();
     while (running_.load()) {
+      auto current_time = std::chrono::system_clock::now();
+      signed long available = Pa_GetStreamReadAvailable(stream_);
+      if (available < 0) {
+        PaError status = available;
+        std::ostringstream message;
+        message << "Error reading stream: " << Pa_GetErrorText(status);
+        error_ = message.str();
+        tsfn_.BlockingCall();
+        break;
+      }
+      if (available == 0) {
+        auto elapsed = current_time - last_available;
+        if (elapsed > std::chrono::seconds(1)) {
+          error_ = "Timeout: over 1s waiting for audio";
+          tsfn_.BlockingCall();
+          break;
+        }
+        continue;
+      }
+      last_available = current_time;
       PaError status =
           Pa_ReadStream(stream_, frame_->samples.data(), buffer_size_);
       overflowed_ = false;
@@ -154,15 +192,22 @@ void InputStream::Start(const Napi::CallbackInfo& info) {
         std::cerr << "Input overflowed: " << Pa_GetErrorText(status)
                   << std::endl;
       } else if (status != paNoError) {
-        std::cerr << "Error reading stream: " << Pa_GetErrorText(status)
-                  << std::endl;
+        std::ostringstream message;
+        message << "Error reading stream: " << Pa_GetErrorText(status);
+        error_ = message.str();
+        tsfn_.BlockingCall();
         break;
       }
       processor_->Process(frame_.get());
       tsfn_.BlockingCall();
     }
     tsfn_.Release();
+    running_ = false;
+    if (error_) {
+      Terminate();
+    }
   });
+  cleanup.success = true;
 }
 
 void InputStream::UpdateJsFrame(Napi::Env env) {
@@ -228,8 +273,14 @@ void InputStream::CallJs(Napi::Env env, Napi::Function callback,
     return;
   }
   stream->UpdateJsFrame(env);
-  Napi::Object frame = stream->js_frame_.Value();
-  callback.Call({frame});
+  if (!stream->error_) {
+    Napi::Object frame = stream->js_frame_.Value();
+    callback.Call({env.Undefined(), frame});
+  } else {
+    callback.Call(
+        {Napi::Error::New(env, *stream->error_).Value(), env.Undefined()});
+    stream->error_ = std::nullopt;
+  }
 }
 
 void InputStream::Stop(const Napi::CallbackInfo& info) {
@@ -254,6 +305,7 @@ void InputStream::Stop(const Napi::CallbackInfo& info) {
 
   PA_CHECK(Pa_StopStream(stream_));
   stream_ = nullptr;
+  Terminate();
 }
 
 }  // namespace rtaudio

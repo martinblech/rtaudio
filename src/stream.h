@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <memory>
+#include <optional>
 #include <thread>
 
 #include "audio.h"
@@ -26,10 +27,11 @@ class InputStream : public Napi::ObjectWrap<InputStream> {
   static void CallJs(Napi::Env env, Napi::Function callback,
                      InputStream* stream, void* data);
   void UpdateJsFrame(Napi::Env env);
+  static void Terminate();
 
   PaStream* stream_ = nullptr;
   std::atomic<bool> running_{false};
-  int device_;
+  std::optional<int> device_;
   double sample_rate_;
   unsigned long buffer_size_;
   bool overflowed_;
@@ -41,6 +43,7 @@ class InputStream : public Napi::ObjectWrap<InputStream> {
 
   TSFN tsfn_;
   Napi::FunctionReference callback_;
+  std::optional<std::string> error_;
   Napi::Reference<Napi::Object> js_frame_;
 };
 
