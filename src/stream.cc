@@ -47,7 +47,7 @@ InputStream::InputStream(const Napi::CallbackInfo& info) : ObjectWrap(info) {
     }
     sample_rate_ = value.ToNumber().DoubleValue();
   } else {
-    sample_rate_ = 44100;
+    sample_rate_ = 48000;
   }
   if (const Napi::Value value = options["bufferSize"]; !value.IsUndefined()) {
     if (!value.IsNumber()) {
