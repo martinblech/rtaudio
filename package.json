@@ -3,14 +3,26 @@
     "main": "index.js",
     "version": "0.0.1",
     "scripts": {
-        "install": "cmake-js compile",
+        "install": "prebuild-install --runtime napi --verbose || npm run rebuild",
+        "prebuild": "prebuild --backend cmake-js --runtime napi --all --strip --verbose",
+        "rebuild": "cmake-js rebuild",
+        "upload": "prebuild --backend cmake-js --runtime napi --all --upload $(cat .github-token)",
         "test": "node test.js"
     },
+    "binary": {
+        "napi_versions": [5]
+    },
     "dependencies": {
-        "bindings": "^1.5.0"
+        "bindings": "^1.5.0",
+        "cmake-js": "^6.3.2",
+        "node-addon-api": "^3.2.1",
+        "prebuild-install": "^7.1.1"
     },
     "devDependencies": {
-        "cmake-js": "^6.3.2",
-        "node-addon-api": "^3.2.1"
+        "prebuild": "^11.0.3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/martinblech/rtaudio.git"
     }
 }

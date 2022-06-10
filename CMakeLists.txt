@@ -29,5 +29,8 @@ string(REGEX REPLACE "[\r\n\"]" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${NODE_ADDON_API_DIR})
 
-# define NPI_VERSION
-add_definitions(-DNAPI_VERSION=5)
+# define NAPI_VERSION
+if (NOT napi_build_version)
+  set(napi_build_version 5)
+endif()
+add_compile_definitions(NAPI_VERSION=${napi_build_version})
