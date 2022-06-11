@@ -17,12 +17,14 @@ struct AudioFrame {
   float rms_slow = 0;
   float rms_mid = 0;
   float rms_fast = 0;
+  float normalized_rms = 0;
   float normalized_rms_mid = 0;
   float normalized_rms_fast = 0;
   float peak = 0;
   float peak_slow = 0;
   float peak_mid = 0;
   float peak_fast = 0;
+  float normalized_peak = 0;
   float normalized_peak_mid = 0;
   float normalized_peak_fast = 0;
 
@@ -35,12 +37,14 @@ struct AudioFrame {
     float rms_slow = 0;
     float rms_mid = 0;
     float rms_fast = 0;
+    float normalized_rms = 0;
     float normalized_rms_mid = 0;
     float normalized_rms_fast = 0;
     float peak = 0;
     float peak_slow = 0;
     float peak_mid = 0;
     float peak_fast = 0;
+    float normalized_peak = 0;
     float normalized_peak_mid = 0;
     float normalized_peak_fast = 0;
   };

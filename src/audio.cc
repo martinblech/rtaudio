@@ -227,8 +227,11 @@ class NormalizeProcessor final : public AudioProcessor {
   explicit NormalizeProcessor() {}
 
   void Process(AudioFrame* frame) final {
+    frame->normalized_rms = div(frame->rms, frame->rms_slow_max);
     frame->normalized_rms_mid = div(frame->rms_mid, frame->rms_slow_max);
     frame->normalized_rms_fast = div(frame->rms_fast, frame->rms_slow_max);
+    frame->normalized_peak =
+        div(frame->peak - frame->rms_slow, frame->peak_slow - frame->rms_slow);
     frame->normalized_peak_mid = div(frame->peak_mid - frame->rms_slow,
                                      frame->peak_slow - frame->rms_slow);
     frame->normalized_peak_fast = div(frame->peak_fast - frame->rms_slow,
@@ -236,8 +239,11 @@ class NormalizeProcessor final : public AudioProcessor {
     for (const auto& band_property :
          {&AudioFrame::bass, &AudioFrame::mid, &AudioFrame::high}) {
       AudioFrame::Band* band = &(frame->*band_property);
+      band->normalized_rms = div(band->rms, band->rms_slow_max);
       band->normalized_rms_mid = div(band->rms_mid, band->rms_slow_max);
       band->normalized_rms_fast = div(band->rms_fast, band->rms_slow_max);
+      band->normalized_peak =
+          div(band->peak - band->rms_slow, band->peak_slow - band->rms_slow);
       band->normalized_peak_mid = div(band->peak_mid - band->rms_slow,
                                       band->peak_slow - band->rms_slow);
       band->normalized_peak_fast = div(band->peak_fast - band->rms_slow,

@@ -226,6 +226,7 @@ void InputStream::UpdateJsFrame(Napi::Env env) {
   frame["rmsSlow"] = Napi::Number::New(env, frame_->rms_slow);
   frame["rmsMid"] = Napi::Number::New(env, frame_->rms_mid);
   frame["rmsFast"] = Napi::Number::New(env, frame_->rms_fast);
+  frame["normalizedRms"] = Napi::Number::New(env, frame_->normalized_rms);
   frame["normalizedRmsMid"] =
       Napi::Number::New(env, frame_->normalized_rms_mid);
   frame["normalizedRmsFast"] =
@@ -234,6 +235,7 @@ void InputStream::UpdateJsFrame(Napi::Env env) {
   frame["peakSlow"] = Napi::Number::New(env, frame_->peak_slow);
   frame["peakMid"] = Napi::Number::New(env, frame_->peak_mid);
   frame["peakFast"] = Napi::Number::New(env, frame_->peak_fast);
+  frame["normalizedPeak"] = Napi::Number::New(env, frame_->normalized_peak);
   frame["normalizedPeakMid"] =
       Napi::Number::New(env, frame_->normalized_peak_mid);
   frame["normalizedPeakFast"] =
@@ -252,6 +254,7 @@ void InputStream::UpdateJsFrame(Napi::Env env) {
     js_band["rmsSlow"] = Napi::Number::New(env, band->rms_slow);
     js_band["rmsMid"] = Napi::Number::New(env, band->rms_mid);
     js_band["rmsFast"] = Napi::Number::New(env, band->rms_fast);
+    js_band["normalizedRms"] = Napi::Number::New(env, band->normalized_rms);
     js_band["normalizedRmsMid"] =
         Napi::Number::New(env, band->normalized_rms_mid);
     js_band["normalizedRmsFast"] =
@@ -260,6 +263,7 @@ void InputStream::UpdateJsFrame(Napi::Env env) {
     js_band["peakSlow"] = Napi::Number::New(env, band->peak_slow);
     js_band["peakMid"] = Napi::Number::New(env, band->peak_mid);
     js_band["peakFast"] = Napi::Number::New(env, band->peak_fast);
+    js_band["normalizedPeak"] = Napi::Number::New(env, band->normalized_peak);
     js_band["normalizedPeakMid"] =
         Napi::Number::New(env, band->normalized_peak_mid);
     js_band["normalizedPeakFast"] =
