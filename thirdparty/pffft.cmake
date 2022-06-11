@@ -4,7 +4,7 @@ FetchContent_Declare(project_pffft
     GIT_TAG             7c3b5a7dc510a0f513b9c5b6dc5b56f7aeeda422
 )
 FetchContent_MakeAvailable(project_pffft)
-add_library(pffft SHARED 
+add_library(pffft STATIC
   "${project_pffft_SOURCE_DIR}/fftpack.h"
   "${project_pffft_SOURCE_DIR}/fftpack.c"
   "${project_pffft_SOURCE_DIR}/pffft.h"
