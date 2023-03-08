@@ -5,8 +5,6 @@ FetchContent_Declare(project_pffft
 )
 FetchContent_MakeAvailable(project_pffft)
 add_library(pffft STATIC
-  "${project_pffft_SOURCE_DIR}/fftpack.h"
-  "${project_pffft_SOURCE_DIR}/fftpack.c"
   "${project_pffft_SOURCE_DIR}/pffft.h"
   "${project_pffft_SOURCE_DIR}/pffft.c"
 )

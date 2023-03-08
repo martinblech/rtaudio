@@ -69,8 +69,8 @@ InputStream::InputStream(const Napi::CallbackInfo& info) : ObjectWrap(info) {
   }
   frame_ = std::unique_ptr<AudioFrame>(new AudioFrame(buffer_size_));
   processor_ = CreateAudioProcessor({
-      .sample_rate = static_cast<float>(sample_rate_),
       .buffer_size = buffer_size_,
+      .sample_rate = static_cast<float>(sample_rate_),
   });
   Napi::Object frame = Napi::Object::New(env);
   frame["sampleRate"] = Napi::Number::New(env, sample_rate_);

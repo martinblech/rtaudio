@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <cmath>
+#include <functional>
 #include <optional>
 
 #include "Iir.h"

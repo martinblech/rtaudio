@@ -5,9 +5,13 @@ set (BUILD_SHARED_LIBS OFF)
 
 project (rtaudio)
 
-include(thirdparty/iir.cmake)
-include(thirdparty/pffft.cmake)
-include(thirdparty/portaudio.cmake)
+# For some reason, macOS build needs to include thirdparty deps *before*
+# add_library(rtaudio). TODO: Investigate why.
+if(APPLE)
+  include(thirdparty/iir.cmake)
+  include(thirdparty/pffft.cmake)
+  include(thirdparty/portaudio.cmake)
+endif()
 
 include_directories(${CMAKE_JS_INC})
 file(GLOB SOURCE_FILES CONFIGURE_DEPENDS "src/*.cc" "src/*.h")
@@ -16,9 +20,17 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
 
+# TODO: Investigate why the include order is platform dependent.
+if(NOT APPLE)
+  include(thirdparty/iir.cmake)
+  include(thirdparty/pffft.cmake)
+  include(thirdparty/portaudio.cmake)
+endif()
+
 target_link_libraries(${PROJECT_NAME} iir)
 target_link_libraries(${PROJECT_NAME} pffft)
-target_link_libraries(${PROJECT_NAME} ${PORTAUDIO_EXTRA_LIBS} portaudio)
+target_link_libraries(${PROJECT_NAME} portaudio)
+target_link_libraries(${PROJECT_NAME} ${PORTAUDIO_EXTRA_LIBS})
 
 # Include Node-API wrappers
 execute_process(COMMAND node -p "require('node-addon-api').include"

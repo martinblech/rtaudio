@@ -28,7 +28,7 @@ Napi::Value GetDevices(const Napi::CallbackInfo& info) {
   const PaDeviceIndex device_count = Pa_GetDeviceCount();
   Napi::Array devices = Napi::Array::New(env);
   for (PaDeviceIndex i = 0; i < device_count; ++i) {
-    devices[i] = GetDeviceInfo(env, i);
+    devices[static_cast<size_t>(i)] = GetDeviceInfo(env, i);
   }
   PA_CHECK(Pa_Terminate(), env.Null());
   return devices;
