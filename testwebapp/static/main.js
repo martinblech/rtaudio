@@ -191,7 +191,7 @@
       ctx.moveTo(0, this.canvas.height / 2);
       for (let i = 0; i < this.history.length; i++) {
         const x = (i * this.canvas.width) / (this.history.length - 1);
-        const value = (this.max - this.min) * (this.history[i] - this.min);
+        const value = (this.history[i] - this.min) / (this.max - this.min);
         const y = this.canvas.height - this.canvas.height * value;
         ctx.lineTo(x, y);
       }
