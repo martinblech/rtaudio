@@ -7,6 +7,7 @@ const { InputStream, getDevices } = require("rtaudio");
 const app = express();
 const server = new Server(app);
 const io = SocketIO(server);
+let lastFrame = null;
 
 function startAudio() {
   console.log("Audio devices:\n", getDevices());
@@ -25,6 +26,7 @@ function startAudio() {
         gotFrame = true;
       }
       io.emit("audioframe", frame);
+      lastFrame = frame;
     },
   });
   try {
@@ -37,6 +39,11 @@ function startAudio() {
 }
 
 startAudio();
+setInterval(() => {
+  if (lastFrame) {
+    console.log("audio frame:", lastFrame);
+  }
+}, 1000);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "static/index.html"));
