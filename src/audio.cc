@@ -122,7 +122,7 @@ class PeakProcessor final : public AudioProcessor {
  public:
   explicit PeakProcessor(size_t buffer_size, float sample_rate) {
     const float sr = sample_rate / buffer_size;  // Follower sample rate.
-    static const float kTauSlow = 2 * 60;        // 2 minutes.
+    static const float kTauSlow = 15;            // 15 seconds.
     static const float kTauMid = .75;            // 750 milliseconds.
     static const float kTauFast = .1;            // 100 milliseconds.
     using Mode = ExpDecayFollower::Mode;
