@@ -293,5 +293,32 @@
         300
       )
     );
+    renderers.push(
+      new HistoryRenderer(
+        addVizCanvas("peakFast", 600, 100),
+        (frame) => {
+          return frame.peakFast;
+        },
+        300, 0, 10,
+      )
+    );
+    renderers.push(
+      new HistoryRenderer(
+        addVizCanvas("peakMid", 600, 100),
+        (frame) => {
+          return frame.peakMid;
+        },
+        300, 0, 10,
+      )
+    );
+    renderers.push(
+      new HistoryRenderer(
+        addVizCanvas("peakSlow (norm)", 600, 100),
+        (frame) => {
+          return frame.peakSlow;
+        },
+        300, 0, 10,
+      )
+    );
   });
 })();
