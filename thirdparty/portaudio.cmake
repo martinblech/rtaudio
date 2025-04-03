@@ -1,8 +1,9 @@
 include(ExternalProject)
 ExternalProject_Add(project_portaudio
-    GIT_REPOSITORY      https://github.com/PortAudio/portaudio.git
-    GIT_TAG             v19.7.0
-    BUILD_COMMAND       make portaudio_static
+    # TODO: Revert to official portaudio after upstream fix.
+    GIT_REPOSITORY      https://github.com/martinblech/portaudio.git
+    GIT_TAG             967d68edd5a93f0f8be4037727a84c67cccf367a
+    BUILD_COMMAND       make portaudio
     INSTALL_COMMAND     :
 )
 ExternalProject_Get_Property(project_portaudio BINARY_DIR)
