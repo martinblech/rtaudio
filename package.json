@@ -1,7 +1,7 @@
 {
     "name": "rtaudio",
     "main": "index.js",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "scripts": {
         "install": "prebuild-install --runtime napi --verbose || npm run rebuild",
         "prebuild": "prebuild --backend cmake-js --runtime napi --all --strip --verbose",
